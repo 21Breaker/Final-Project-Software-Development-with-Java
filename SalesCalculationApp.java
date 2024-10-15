@@ -1,8 +1,7 @@
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class SalesCalculationApp extends Application {
 
@@ -45,8 +44,45 @@ public class SalesCalculationApp extends Application {
 
         Button btnSubmit = new Button("Submit");
         btnSubmit.setOnAction(e -> {
-            // Handle form submission
-            // Validate and process the input data
+            String transactionID = txtTransactionID.getText();
+            LocalDate date = datePicker.getValue();
+            double amount = Double.parseDouble(txtAmount.getText());
+            String customerName = txtCustomerName.getText();
+            String productID = txtProductID.getText();
+            String productName = txtProductName.getText();
+            int quantitySold = Integer.parseInt(txtQuantitySold.getText());
+            double unitPrice = Double.parseDouble(txtUnitPrice.getText());
+
+            // Validate the input data
+            if (amount <= 0 || quantitySold <= 0 || unitPrice <= 0) {
+                showAlert("Invalid input", "Amount, Quantity Sold, and Unit Price must be positive numbers.");
+                return;
+            }
+
+            // Save data to the database
+            Connection connection = JDBC.getConnection();
+            if (connection != null) {
+                try {
+                    String query = "INSERT INTO sales (transactionID, date, amount, customerName, productID, productName, quantitySold, unitPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    preparedStatement.setString(1, transactionID);
+                    preparedStatement.setDate(2, java.sql.Date.valueOf(date));
+                    preparedStatement.setDouble(3, amount);
+                    preparedStatement.setString(4, customerName);
+                    preparedStatement.setString(5, productID);
+                    preparedStatement.setString(6, productName);
+                    preparedStatement.setInt(7, quantitySold);
+                    preparedStatement.setDouble(8, unitPrice);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            // Update dashboard labels
+            lblTotalSales.setText("Total Sales: $" + amount);
+            lblAverageSales.setText("Average Sales per Day: $" + (amount / 1)); // Simplified for example
+            lblTopProduct.setText("Top-Selling Product: " + productName);
         });
 
         VBox form = new VBox(10, txtTransactionID, datePicker, txtAmount, txtCustomerName, txtProductID, txtProductName, txtQuantitySold, txtUnitPrice, btnSubmit);
