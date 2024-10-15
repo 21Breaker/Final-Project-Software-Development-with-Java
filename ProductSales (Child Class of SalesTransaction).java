@@ -3,11 +3,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+// ProductSales class extends SalesTransaction
 public class ProductSales extends SalesTransaction {
     private String productName;
     private int quantitySold;
     private double unitPrice;
 
+    // Constructor to initialize ProductSales object
     public ProductSales(String transactionID, LocalDate date, double amount, String customerName, String productID, String productName, int quantitySold, double unitPrice) {
         super(transactionID, date, amount, customerName, productID);
         this.productName = productName;
@@ -15,11 +17,13 @@ public class ProductSales extends SalesTransaction {
         this.unitPrice = unitPrice;
     }
 
+    // Override method to calculate the total amount
     @Override
     public void calculateTotal() {
         this.amount = this.quantitySold * this.unitPrice;
     }
 
+    // Override method to validate the transaction
     @Override
     public void validateTransaction() {
         if (this.quantitySold <= 0 || this.unitPrice <= 0) {
@@ -27,12 +31,15 @@ public class ProductSales extends SalesTransaction {
         }
     }
 
+    // Method to save the transaction details to the database
     public void saveToDatabase() {
         Connection connection = JDBC.getConnection();
         if (connection != null) {
             try {
+                // SQL query to insert transaction details into the product_sales table
                 String query = "INSERT INTO product_sales (transactionID, date, amount, customerName, productID, productName, quantitySold, unitPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
+                // Set the values for the query parameters
                 preparedStatement.setString(1, this.transactionID);
                 preparedStatement.setDate(2, java.sql.Date.valueOf(this.date));
                 preparedStatement.setDouble(3, this.amount);
@@ -41,8 +48,10 @@ public class ProductSales extends SalesTransaction {
                 preparedStatement.setString(6, this.productName);
                 preparedStatement.setInt(7, this.quantitySold);
                 preparedStatement.setDouble(8, this.unitPrice);
+                // Execute the query
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
+                // Print the stack trace if an SQL exception occurs
                 e.printStackTrace();
             }
         }
