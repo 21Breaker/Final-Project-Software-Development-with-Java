@@ -42,8 +42,10 @@ public class SalesCalculationApp extends Application {
         TextField txtUnitPrice = new TextField();
         txtUnitPrice.setPromptText("Unit Price");
 
+        // Button to submit the sales data
         Button btnSubmit = new Button("Submit");
         btnSubmit.setOnAction(e -> {
+            // Retrieve input values from the form
             String transactionID = txtTransactionID.getText();
             LocalDate date = datePicker.getValue();
             double amount = Double.parseDouble(txtAmount.getText());
@@ -55,6 +57,7 @@ public class SalesCalculationApp extends Application {
 
             // Validate the input data
             if (amount <= 0 || quantitySold <= 0 || unitPrice <= 0) {
+                // Show an alert if any of the values are invalid
                 showAlert("Invalid input", "Amount, Quantity Sold, and Unit Price must be positive numbers.");
                 return;
             }
@@ -63,8 +66,10 @@ public class SalesCalculationApp extends Application {
             Connection connection = JDBC.getConnection();
             if (connection != null) {
                 try {
+                    // Prepare the SQL query for inserting data into the sales table
                     String query = "INSERT INTO sales (transactionID, date, amount, customerName, productID, productName, quantitySold, unitPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    // Set the values for the query parameters
                     preparedStatement.setString(1, transactionID);
                     preparedStatement.setDate(2, java.sql.Date.valueOf(date));
                     preparedStatement.setDouble(3, amount);
@@ -73,27 +78,31 @@ public class SalesCalculationApp extends Application {
                     preparedStatement.setString(6, productName);
                     preparedStatement.setInt(7, quantitySold);
                     preparedStatement.setDouble(8, unitPrice);
+                    // Execute the query
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
+                    // Print the stack trace if an SQL exception occurs
                     ex.printStackTrace();
                 }
             }
 
-            // Update dashboard labels
+            // Update dashboard labels with the new sales data
             lblTotalSales.setText("Total Sales: $" + amount);
             lblAverageSales.setText("Average Sales per Day: $" + (amount / 1)); // Simplified for example
             lblTopProduct.setText("Top-Selling Product: " + productName);
         });
 
+        // Form layout for sales data input
         VBox form = new VBox(10, txtTransactionID, datePicker, txtAmount, txtCustomerName, txtProductID, txtProductName, txtQuantitySold, txtUnitPrice, btnSubmit);
         form.setPadding(new Insets(10));
 
-        // Main Layout
+        // Main layout of the application
         BorderPane mainLayout = new BorderPane();
         mainLayout.setTop(menuBar);
         mainLayout.setCenter(dashboard);
         mainLayout.setBottom(form);
 
+        // Set the scene and show the primary stage
         Scene scene = new Scene(mainLayout, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
