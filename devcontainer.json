@@ -1,10 +1,8 @@
 {
-  "name": "Java",
-  "image": "mcr.microsoft.com/devcontainers/java:0-11",
+  "name": "Java Dev Container",
+  "image": "mcr.microsoft.com/vscode/devcontainers/java:0-11",
   "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "11"
-    }
+    "mysql": "latest"
   },
-  "postCreateCommand": "apt-get update && apt-get install -y openjfx"
+  "forwardPorts": 
 }
